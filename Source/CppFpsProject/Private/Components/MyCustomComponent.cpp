@@ -32,7 +32,7 @@ void UMyCustomComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	// ...
-	UE_LOG(LogTemp, Error, TEXT("UMyCustomComponent"));
-	UE_LOG(LogTemp, Warning, TEXT("DeltaTime=%f %s"),DeltaTime ,*FString(__FUNCTION__));
+	//UE_LOG(LogTemp, Error, TEXT("UMyCustomComponent"));
+	//UE_LOG(LogTemp, Warning, TEXT("DeltaTime=%f %s"),DeltaTime ,*FString(__FUNCTION__));
 }
 

@@ -56,7 +56,7 @@ void ATestActor::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 	//UE_LOG(LogTemp, Warning, TEXT("ATestActor::Tick() called with DeltaSeconds: %f"), DeltaSeconds);
 
-	if (MyActorComponent) UE_LOG(LogTemp, Warning, TEXT("MyCustomComponentHealth=%f"), MyActorComponent->health);
+	//if (MyActorComponent) UE_LOG(LogTemp, Warning, TEXT("MyCustomComponentHealth=%f"), MyActorComponent->health);
 }
 
 void ATestActor::BoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
