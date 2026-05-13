@@ -43,7 +43,7 @@ void AInputCharacter::BindInputContext()
 				}
 			}                             
 		}
-}
+} 
 
 // Called to bind functionality to input
 void AInputCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
