@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "InputCharacter.generated.h"
 
+class UWidgetComponent;
+class UTestWidget;
 class UEnhancedInputLocalPlayerSubsystem;
 struct FInputActionValue;
 class UInputAction;
@@ -17,20 +19,15 @@ class CPPFPSPROJECT_API AInputCharacter : public ACharacter
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this character's properties
 	AInputCharacter();
-	
-
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	void GoldManagement();
+	void ProgressBarManagement();
 	void BindInputContext();
 
 public:
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
-	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	UPROPERTY()
@@ -51,6 +48,12 @@ public:
 	UPROPERTY(EditAnywhere)
 	UInputAction* MouseLookAction;
 
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UUserWidget> TestWidgetClass;
+
+	UPROPERTY(EditAnywhere)
+	UWidgetComponent* TestWidgetComponent;
+	
 	UFUNCTION()
 	void CustomJump();
 
@@ -59,4 +62,16 @@ public:
 
 	UFUNCTION()
 	void CustomMouseLook(const FInputActionValue& InputValue);
+
+	UPROPERTY()
+	UTestWidget* CreatedTestWidget;
+
+	UPROPERTY()
+	UTestWidget* CreatedTestWidgetComp;
+	
+	float TimePassed = 0.f;
+
+	int32 Gold = 0;
+
+	int32 Score = 0;
 };
