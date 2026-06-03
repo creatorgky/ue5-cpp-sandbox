@@ -21,7 +21,7 @@ public class CppFpsProject : ModuleRules
 			"Slate"
 		});
 
-		PrivateDependencyModuleNames.AddRange(new string[] { });
+		PrivateDependencyModuleNames.AddRange(new string[] { "AnimGraphRuntime" });
 
 		PublicIncludePaths.AddRange(new string[] {
 			"CppFpsProject",

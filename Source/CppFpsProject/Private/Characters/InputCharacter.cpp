@@ -7,7 +7,10 @@
 #include "EnhancedInputSubsystems.h"
 #include "TestWidget.h"
 #include "Blueprint/UserWidget.h"
+#include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
+#include "Interface/InteractInterface.h"
+#include "Kismet/GameplayStatics.h"
 
 
 // Sets default values
@@ -19,6 +22,11 @@ AInputCharacter::AInputCharacter()
 	TestWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("TestWidgetComponent"));
 	TestWidgetComponent->SetupAttachment(GetRootComponent());
 	TestWidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
+
+	SphereCollision = CreateDefaultSubobject<USphereComponent>(TEXT("SphereCollision"));
+	SphereCollision->SetupAttachment(GetRootComponent());
+	SphereCollision->SetSphereRadius(1000.f);
+	SphereCollision->SetHiddenInGame(false);
 }
 
 
@@ -50,6 +58,15 @@ void AInputCharacter::BeginPlay()
 		CreatedTestWidgetComp = Cast<UTestWidget>(UserWidgetObject);
 		}
 	}
+
+	if (SphereCollision)
+	{
+		SphereCollision->OnComponentBeginOverlap.AddDynamic(this, &AInputCharacter::OnSphereBeginOverlap);
+	}
+
+	FTimerHandle CustomTimerHandle;
+	FTimerDelegate CustomTimerDelegate = FTimerDelegate::CreateUObject(this, &AInputCharacter::Trace, 10000.f);
+	GetWorldTimerManager().SetTimer(CustomTimerHandle,CustomTimerDelegate, 0.1f, true);
 }
 
 
@@ -125,7 +142,6 @@ void AInputCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 
 void AInputCharacter::CustomJump()
 {
-	UE_LOG(LogTemp, Warning, TEXT("JUMP!"));
 	Jump();
 	Score++;
 	if (CreatedTestWidget)
@@ -136,12 +152,53 @@ void AInputCharacter::CustomJump()
 	{
 		CreatedTestWidgetComp->SetScore(Score*50);
 	}
+
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(this,AActor::StaticClass(),FoundActors);
+	UE_LOG(LogTemp, Warning, TEXT("Found Actors: %d"), FoundActors.Num());
+	for (AActor* Actor : FoundActors)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Actor Name: %s"), *Actor->GetName());
+	}
+}
+
+void AInputCharacter::Trace(float length)
+{
+	FCollisionQueryParams CollisionParams;
+	CollisionParams.AddIgnoredActor(this);
+	
+	FHitResult HitResult;
+	FVector Start = GetActorLocation();
+	FVector End = Start + GetActorForwardVector() * 10000.f;
+	GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, CollisionParams);
+	UKismetSystemLibrary::DrawDebugLine(GetWorld(), Start, End, FColor::Emerald, 5.f, 3);
+	if (HitResult.bBlockingHit)
+	{
+		if (HitResult.GetActor())
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Hit Actor: %s"), *HitResult.GetActor()->GetName());
+			HitResult.GetActor()->Destroy();
+		}
+	}
+}
+
+void AInputCharacter::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+                                           UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (OtherActor && OtherActor != this)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("OVERLAP! %s"), *OtherActor->GetName());
+
+		IInteractInterface* InterfaceActor = Cast<IInteractInterface>(OtherActor);
+		if (InterfaceActor)
+		{
+			InterfaceActor->Interact();
+		}
+	}
 }
 
 void AInputCharacter::CustomMove(const FInputActionValue& InputValue)
 {
-	UE_LOG(LogTemp, Warning, TEXT("MOVE!"));
-
 	FVector2D Input =  InputValue.Get<FVector2D>();
 	
 	AddMovementInput(GetActorForwardVector(),Input.X);
@@ -150,8 +207,6 @@ void AInputCharacter::CustomMove(const FInputActionValue& InputValue)
 
 void AInputCharacter::CustomMouseLook(const FInputActionValue& InputValue)
 {
-	UE_LOG(LogTemp, Warning, TEXT("LOOK! %s"), *InputValue.ToString());
-
 	FVector2D Input = InputValue.Get<FVector2D>();
 
 	AddControllerYawInput(Input.X);

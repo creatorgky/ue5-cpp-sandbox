@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "InputCharacter.generated.h"
 
+class USphereComponent;
 class UWidgetComponent;
 class UTestWidget;
 class UEnhancedInputLocalPlayerSubsystem;
@@ -30,6 +31,9 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	UPROPERTY(EditDefaultsOnly)
+	USphereComponent* SphereCollision;
+	
 	UPROPERTY()
 	UEnhancedInputLocalPlayerSubsystem* InputSubsystem;
 	
@@ -56,6 +60,12 @@ public:
 	
 	UFUNCTION()
 	void CustomJump();
+
+	UFUNCTION(Exec)
+	void Trace(float length);
+
+	UFUNCTION()
+	void OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 	UFUNCTION()
 	void CustomMove(const FInputActionValue& InputValue);
